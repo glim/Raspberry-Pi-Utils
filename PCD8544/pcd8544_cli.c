@@ -48,6 +48,18 @@ Lesser General Public License for more details.
 #include "PCD8544.h"
 
 // pin setup
+// SCLK = 17
+// DIN  = 18
+// DC   = 27
+// RST  = 23
+// CS   = 22
+
+// int _din = 18;//1;
+// int _sclk = 17;//0;
+// int _dc = 27;//2;
+// int _rst = 23;//4;
+// int _cs = 22;//3;
+
 int _din = 1;
 int _sclk = 0;
 int _dc = 2;
@@ -55,23 +67,31 @@ int _rst = 4;
 int _cs = 3;
 
 // lcd contrast
-int contrast = 50;
+int contrast = 0;
 
 //int main (void)
 int main(int argc, char *argv[])
 {
 
-  if (argc > 3)
+  // if (argc > 3)
+  // {
+  //   printf("Only one or two argument expected\n");
+  //   exit(1);
+  // }
+
+    // check wiringPi setup
+  if (wiringPiSetup() == -1)
   {
-    printf("Only one or two argument expected\n");
+  printf("wiringPi-Error\n");
     exit(1);
   }
+
 
   int i;
   char *command;
   char *output;
 
-  output = argv[1];
+  output = "";
 
   for (i = 1; i < argc; i++) {
 
@@ -82,10 +102,11 @@ int main(int argc, char *argv[])
           switch (argv[i][1]) {
 
               case 'i':   //a_value = atoi(argv[++i]);
-                  command = "hostname -I";
-                  output = getCommandLineOutput(command);
+                  // command = "hostname -I";
+                  // output = getCommandLineOutput(command);
+                  // init and clear lcd
+                  contrast = 50;
                   break;
-
               // Help
               case 'h':
                   printf("usage: pcd8544_cli [options] <text to display>\n");
@@ -97,13 +118,15 @@ int main(int argc, char *argv[])
                   break;
 
               case 'c':   //c_value = argv[++i];
-                          break;
-
+                  LCDclear();
+                  break;
               case 'd':
                   command = "date";
                   output = getCommandLineOutput(command);
                   break;
-
+              case 'o':
+                  output = argv[++i];
+                  break;
               default:
                   printf("pcd8544_cli: invalid option\n");
                   printf("Type « sudo ./pcd8544_cli -h » for more informations\n");
@@ -113,26 +136,16 @@ int main(int argc, char *argv[])
       }
   }
 
-  // check wiringPi setup
-  if (wiringPiSetup() == -1)
-  {
-	printf("wiringPi-Error\n");
-    exit(1);
-  }
-
-  // init and clear lcd
   LCDInit(_sclk, _din, _dc, _cs, _rst, contrast);
-  LCDclear();
-
   // get system usage / info
-  struct sysinfo sys_info;
-  if(sysinfo(&sys_info) != 0)
-  {
-      printf("sysinfo-Error\n");
-  }
+  // struct sysinfo sys_info;
+  // if(sysinfo(&sys_info) != 0)
+  // {
+  //     printf("sysinfo-Error\n");
+  // }
 
   // build screen
-  LCDdrawstring(0, 0, output);
+  LCDdrawstring(0, 8, output);
   LCDdisplay();
 
   return 0;

@@ -410,7 +410,8 @@ void LCDInit(uint8_t SCLK, uint8_t DIN, uint8_t DC, uint8_t CS, uint8_t RST, uin
 	cursor_x = cursor_y = 0;
 	textsize = 1;
 	textcolor = BLACK;
-
+	if (contrast == 0)
+		return;
 	// set pin directions
 	pinMode(_din, OUTPUT);
 	pinMode(_sclk, OUTPUT);
